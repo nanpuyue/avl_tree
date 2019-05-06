@@ -11,7 +11,7 @@ use InnerResult::*;
 mod test;
 mod util;
 
-type AvlTreeNode<T> = Option<Box<TreeNode<T>>>;
+pub type AvlTreeNode<T> = Option<Box<TreeNode<T>>>;
 
 #[derive(Clone, Debug)]
 pub struct TreeNode<T: PartialOrd> {
