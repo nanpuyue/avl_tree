@@ -19,43 +19,29 @@ pub struct TreeNode<T: PartialOrd> {
     right: AvlTreeNode<T>,
 }
 
-#[derive(Debug)]
-pub enum InnerResult {
+enum InnerResult {
     Left,
     Right,
     True,
     False,
 }
 
-pub trait AvlTree<T: PartialOrd> {
-    fn new(val: T) -> Self;
-    fn height(&self) -> i32;
+trait _AvlTree<T: PartialOrd> {
     fn update_height(&mut self);
     fn rotate_ll(&mut self);
     fn rotate_rr(&mut self);
     fn rotate_lr(&mut self);
     fn rotate_rl(&mut self);
     fn do_insert(&mut self, val: T) -> InnerResult;
+}
+
+pub trait AvlTree<T: PartialOrd> {
+    fn new(val: T) -> Self;
+    fn height(&self) -> i32;
     fn insert(&mut self, val: T);
 }
 
-impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
-    fn new(val: T) -> Self {
-        Some(Box::new(TreeNode {
-            val,
-            height: 1,
-            left: None,
-            right: None,
-        }))
-    }
-
-    fn height(&self) -> i32 {
-        match self {
-            None => 0,
-            Some(x) => x.height,
-        }
-    }
-
+impl<T: PartialOrd> _AvlTree<T> for AvlTreeNode<T> {
     fn update_height(&mut self) {
         match self {
             None => return,
@@ -120,7 +106,6 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
             }
         }
     }
-
     fn do_insert(&mut self, val: T) -> InnerResult {
         match self {
             None => {
@@ -160,6 +145,24 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
                 self.update_height();
                 ret
             }
+        }
+    }
+}
+
+impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
+    fn new(val: T) -> Self {
+        Some(Box::new(TreeNode {
+            val,
+            height: 1,
+            left: None,
+            right: None,
+        }))
+    }
+
+    fn height(&self) -> i32 {
+        match self {
+            None => 0,
+            Some(x) => x.height,
         }
     }
 
