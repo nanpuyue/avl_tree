@@ -16,6 +16,7 @@ trait AvlTree<T: PartialOrd> {
     fn height(&self) -> usize;
     fn update_height(&mut self);
     fn rotate_ll(&mut self);
+    fn rotate_rr(&mut self);
     fn insert(&mut self, val: T) -> bool;
 }
 
@@ -62,6 +63,25 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
         }
     }
 
+    fn rotate_rr(&mut self) {
+        match self {
+            None => return,
+            Some(root) => {
+                let right = &mut root.right.take();
+                match right {
+                    None => unreachable!(),
+                    Some(x) => {
+                        root.right = x.left.take();
+                        self.update_height();
+                        swap(&mut x.left, self);
+                        swap(right, self);
+                        self.update_height();
+                    }
+                }
+            }
+        }
+    }
+
     fn insert(&mut self, val: T) -> bool {
         match self {
             None => {
@@ -88,9 +108,9 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
 
 fn main() {
     let mut avl_tree = None;
-    for i in &[5, 4, 3, 6, 2, 7] {
+    for i in &[5, 4, 3, 6, 7, 8] {
         avl_tree.insert(*i);
     }
-    avl_tree.rotate_ll();
+    avl_tree.rotate_rr();
     dbg!(&avl_tree);
 }
