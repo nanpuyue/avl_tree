@@ -1,25 +1,37 @@
+#![feature(bind_by_move_pattern_guards)]
+
 use core::cmp::max;
 use core::mem::swap;
+
+use InsertResult::*;
 
 type AvlTreeNode<T> = Option<Box<TreeNode<T>>>;
 
 #[derive(Clone, Debug)]
 struct TreeNode<T: PartialOrd> {
     val: T,
-    height: usize,
+    height: i32,
     left: AvlTreeNode<T>,
     right: AvlTreeNode<T>,
 }
 
+#[derive(Debug)]
+enum InsertResult {
+    Left,
+    Right,
+    True,
+    False,
+}
+
 trait AvlTree<T: PartialOrd> {
     fn new(val: T) -> Self;
-    fn height(&self) -> usize;
+    fn height(&self) -> i32;
     fn update_height(&mut self);
     fn rotate_ll(&mut self);
     fn rotate_rr(&mut self);
     fn rotate_lr(&mut self);
     fn rotate_rl(&mut self);
-    fn insert(&mut self, val: T) -> bool;
+    fn insert(&mut self, val: T) -> InsertResult;
 }
 
 impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
@@ -32,7 +44,7 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
         }))
     }
 
-    fn height(&self) -> usize {
+    fn height(&self) -> i32 {
         match self {
             None => 0,
             Some(x) => x.height,
@@ -104,24 +116,43 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
         }
     }
 
-    fn insert(&mut self, val: T) -> bool {
+    fn insert(&mut self, val: T) -> InsertResult {
         match self {
             None => {
                 *self = Self::new(val);
-                false
+                True
             }
             Some(root) => {
-                let mut ret = root.left.is_none() && root.right.is_none();
-                ret |= {
+                let ret = {
                     if val < root.val {
-                        root.left.insert(val)
+                        match root.left.insert(val) {
+                            False => False,
+                            x if root.left.height() - root.right.height() == 2 => {
+                                match x {
+                                    Left => self.rotate_ll(),
+                                    Right => self.rotate_lr(),
+                                    _ => unreachable!(),
+                                }
+                                False
+                            }
+                            _ => Left,
+                        }
                     } else {
-                        root.right.insert(val)
+                        match root.right.insert(val) {
+                            False => False,
+                            x if root.right.height() - root.left.height() == 2 => {
+                                match x {
+                                    Left => self.rotate_rl(),
+                                    Right => self.rotate_rr(),
+                                    _ => unreachable!(),
+                                }
+                                False
+                            }
+                            _ => Right,
+                        }
                     }
                 };
-                if ret {
-                    root.height += 1;
-                }
+                self.update_height();
                 ret
             }
         }
@@ -130,9 +161,8 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
 
 fn main() {
     let mut avl_tree = None;
-    for i in &[5, 4, 3, 6, 7, 8] {
+    for i in &vec![50,16,7,43,21,14,30,11,42,17,10,49,33,48,46,1,45,9,6,15] {
         avl_tree.insert(*i);
     }
-    avl_tree.rotate_rr();
     dbg!(&avl_tree);
 }
