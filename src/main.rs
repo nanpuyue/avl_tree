@@ -1,5 +1,5 @@
-use core::mem::swap;
 use core::cmp::max;
+use core::mem::swap;
 
 type AvlTreeNode<T> = Option<Box<TreeNode<T>>>;
 
@@ -17,6 +17,8 @@ trait AvlTree<T: PartialOrd> {
     fn update_height(&mut self);
     fn rotate_ll(&mut self);
     fn rotate_rr(&mut self);
+    fn rotate_lr(&mut self);
+    fn rotate_rl(&mut self);
     fn insert(&mut self, val: T) -> bool;
 }
 
@@ -78,6 +80,26 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
                         self.update_height();
                     }
                 }
+            }
+        }
+    }
+
+    fn rotate_lr(&mut self) {
+        match self {
+            None => return,
+            Some(root) => {
+                root.left.rotate_rr();
+                self.rotate_ll();
+            }
+        }
+    }
+
+    fn rotate_rl(&mut self) {
+        match self {
+            None => return,
+            Some(root) => {
+                root.right.rotate_ll();
+                self.rotate_rr();
             }
         }
     }
