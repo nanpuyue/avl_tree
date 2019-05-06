@@ -3,11 +3,13 @@
 use core::cmp::max;
 use core::mem::swap;
 
+pub use util::*;
+
 use InnerResult::*;
 
 #[cfg(test)]
 mod test;
-pub mod util;
+mod util;
 
 type AvlTreeNode<T> = Option<Box<TreeNode<T>>>;
 
@@ -26,7 +28,7 @@ enum InnerResult {
     False,
 }
 
-trait _AvlTree<T: PartialOrd> {
+trait __AvlTree<T: PartialOrd> {
     fn update_height(&mut self);
     fn rotate_ll(&mut self);
     fn rotate_rr(&mut self);
@@ -41,7 +43,7 @@ pub trait AvlTree<T: PartialOrd> {
     fn insert(&mut self, val: T);
 }
 
-impl<T: PartialOrd> _AvlTree<T> for AvlTreeNode<T> {
+impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
     fn update_height(&mut self) {
         match self {
             None => return,

@@ -1,6 +1,5 @@
 #[test]
 fn insert_test() {
-    use super::util::validate;
     use super::*;
 
     let mut avl_tree = None;
