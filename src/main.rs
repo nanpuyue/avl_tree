@@ -1,7 +1,7 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+use core::mem::swap;
+use core::cmp::max;
 
-type AvlTreeNode<T> = Option<Rc<RefCell<TreeNode<T>>>>;
+type AvlTreeNode<T> = Option<Box<TreeNode<T>>>;
 
 #[derive(Clone, Debug)]
 struct TreeNode<T: PartialOrd> {
@@ -13,17 +13,53 @@ struct TreeNode<T: PartialOrd> {
 
 trait AvlTree<T: PartialOrd> {
     fn new(val: T) -> Self;
+    fn height(&self) -> usize;
+    fn update_height(&mut self);
+    fn rotate_ll(&mut self);
     fn insert(&mut self, val: T) -> bool;
 }
 
 impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
     fn new(val: T) -> Self {
-        Some(Rc::new(RefCell::new(TreeNode {
+        Some(Box::new(TreeNode {
             val,
-            height: 0,
+            height: 1,
             left: None,
             right: None,
-        })))
+        }))
+    }
+
+    fn height(&self) -> usize {
+        match self {
+            None => 0,
+            Some(x) => x.height,
+        }
+    }
+
+    fn update_height(&mut self) {
+        match self {
+            None => return,
+            Some(x) => x.height = max(x.left.height(), x.right.height()) + 1,
+        }
+    }
+
+    fn rotate_ll(&mut self) {
+        match self {
+            None => return,
+            Some(root) => {
+                let left = &mut root.left.take();
+                match left {
+                    None => unreachable!(),
+                    Some(x) => {
+                        root.left = x.right.take();
+                        self.update_height();
+                        swap(&mut x.right, self);
+                        swap(left, self);
+                        self.update_height();
+                    }
+                }
+            }
+        }
     }
 
     fn insert(&mut self, val: T) -> bool {
@@ -33,7 +69,6 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
                 false
             }
             Some(root) => {
-                let mut root = root.borrow_mut();
                 let mut ret = root.left.is_none() && root.right.is_none();
                 ret |= {
                     if val < root.val {
@@ -53,8 +88,9 @@ impl<T: PartialOrd> AvlTree<T> for AvlTreeNode<T> {
 
 fn main() {
     let mut avl_tree = None;
-    for i in &[3, 4, 1, 6, 3, 8, 9, 5] {
+    for i in &[5, 4, 3, 6, 2, 7] {
         avl_tree.insert(*i);
     }
-    dbg!(avl_tree);
+    avl_tree.rotate_ll();
+    dbg!(&avl_tree);
 }
