@@ -22,10 +22,10 @@ pub struct TreeNode<T: PartialOrd> {
 }
 
 enum InnerResult {
-    Left,
-    Right,
-    True,
-    False,
+    Left,  //操作在左子树完成
+    Right, //操作在右子树完成
+    True,  //本次调用直接完成了操作
+    False, //树已平衡，无需再进行旋转操作
 }
 
 trait __AvlTree<T: PartialOrd> {
