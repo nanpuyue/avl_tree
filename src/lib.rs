@@ -158,8 +158,11 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
             }
             Some(root) => {
                 let ret = {
+                    //重复数据
+                    if val == root.val {
+                        Balanced
                     //进入左子树递归插入
-                    if val < root.val {
+                    } else if val < root.val {
                         match root.left.do_insert(val) {
                             Balanced => Balanced,
                             x if self.balance_factor() == 2 => {
