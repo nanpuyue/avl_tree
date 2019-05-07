@@ -206,95 +206,78 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                 Balanced
             }
             Some(root) => {
-                let ret = {
-                    if *val == root.val || *val == *root {
-                        if root.left.is_some() {
-                            if root.right.is_some() {
-                                if root.left.height() > root.right.height() {
-                                    let mut left_max = Max;
-                                    root.left.do_delete(&mut left_max);
-                                    match left_max {
-                                        Del(Some(ref mut x)) => {
-                                            swap(&mut root.val, &mut x.val);
-                                            *val = left_max;
-                                        }
-                                        _ => unreachable!(),
+                if *val == root.val || *val == *root {
+                    if root.left.is_some() {
+                        if root.right.is_some() {
+                            if root.left.height() > root.right.height() {
+                                let mut left_max = Max;
+                                root.left.do_delete(&mut left_max);
+                                match left_max {
+                                    Del(Some(ref mut x)) => {
+                                        swap(&mut root.val, &mut x.val);
+                                        *val = left_max;
                                     }
-                                } else {
-                                    let mut right_min = Min;
-                                    root.right.do_delete(&mut right_min);
-                                    match right_min {
-                                        Del(Some(ref mut x)) => {
-                                            swap(&mut root.val, &mut x.val);
-                                            *val = right_min;
-                                        }
-                                        _ => unreachable!(),
-                                    }
+                                    _ => unreachable!(),
                                 }
                             } else {
-                                let mut left = root.left.take();
-                                swap(self, &mut left);
-                                *val = Del(left);
-                            }
-                        } else if root.right.is_some() {
-                            let mut right = root.right.take();
-                            swap(self, &mut right);
-                            *val = Del(right);
-                        } else {
-                            let mut deleted = None;
-                            swap(self, &mut deleted);
-                            *val = Del(deleted);
-                        }
-                        self.update_height();
-                        if self.balance_factor() == 0 {
-                            Unknown
-                        } else {
-                            Balanced
-                        }
-                    } else if *val < root.val {
-                        match root.left.do_delete(val) {
-                            Balanced => Balanced,
-                            Unknown => {
-                                if self.balance_factor() == -2 {
-                                    let right = self.as_ref().unwrap().right.as_ref().unwrap();
-                                    if right.left.height() > right.right.height() {
-                                        self.rotate_rl();
-                                    } else {
-                                        self.rotate_rr();
+                                let mut right_min = Min;
+                                root.right.do_delete(&mut right_min);
+                                match right_min {
+                                    Del(Some(ref mut x)) => {
+                                        swap(&mut root.val, &mut x.val);
+                                        *val = right_min;
                                     }
-                                }
-                                if self.balance_factor() == 0 {
-                                    Unknown
-                                } else {
-                                    Balanced
+                                    _ => unreachable!(),
                                 }
                             }
-                            _ => unreachable!(),
+                        } else {
+                            let mut left = root.left.take();
+                            swap(self, &mut left);
+                            *val = Del(left);
                         }
                     } else {
-                        match root.right.do_delete(val) {
-                            Balanced => Balanced,
-                            Unknown => {
-                                if self.balance_factor() == 2 {
-                                    let left = self.as_ref().unwrap().left.as_ref().unwrap();
-                                    if left.left.height() >= left.right.height() {
-                                        self.rotate_ll();
-                                    } else {
-                                        self.rotate_lr();
-                                    }
-                                }
-                                if self.balance_factor() == 0 {
-                                    Unknown
+                        let mut right = root.right.take();
+                        swap(self, &mut right);
+                        *val = Del(right);
+                    }
+                } else if *val < root.val {
+                    match root.left.do_delete(val) {
+                        Balanced => return Balanced,
+                        Unknown => {
+                            if self.balance_factor() == -2 {
+                                let right = self.as_ref().unwrap().right.as_ref().unwrap();
+                                if right.left.height() > right.right.height() {
+                                    self.rotate_rl();
                                 } else {
-                                    Balanced
+                                    self.rotate_rr();
                                 }
                             }
-                            _ => unreachable!(),
                         }
+                        _ => unreachable!(),
                     }
-                };
+                } else {
+                    match root.right.do_delete(val) {
+                        Balanced => return Balanced,
+                        Unknown => {
+                            if self.balance_factor() == 2 {
+                                let left = self.as_ref().unwrap().left.as_ref().unwrap();
+                                if left.left.height() >= left.right.height() {
+                                    self.rotate_ll();
+                                } else {
+                                    self.rotate_lr();
+                                }
+                            }
+                        }
+                        _ => unreachable!(),
+                    }
+                }
                 self.update_height();
-                ret
+
+                if self.balance_factor() == 0 {
+                    Unknown
+                } else {
+                    Balanced
+                }
             }
         }
     }
