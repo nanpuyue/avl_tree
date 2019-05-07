@@ -22,8 +22,8 @@ pub struct TreeNode<T: PartialOrd> {
 }
 
 enum InnerResult {
-    Left,     //操作在左子树完成
-    Right,    //操作在右子树完成
+    Left,     //在左子树完成插入
+    Right,    //在右子树完成插入
     Unknown,  //树的平衡性未知
     Balanced, //树已平衡
 }
@@ -41,26 +41,18 @@ impl<T: PartialOrd> PartialEq<Box<TreeNode<T>>> for DeleteValue<T> {
         match self {
             Min => other.left.is_none(),
             Max => other.right.is_none(),
+            Val(v) => v == &other.val,
             _ => false,
         }
     }
 }
 
-impl<T: PartialOrd> PartialEq<T> for DeleteValue<T> {
-    fn eq(&self, other: &T) -> bool {
-        match self {
-            Val(v) => v == other,
-            _ => false,
-        }
-    }
-}
-
-impl<T: PartialOrd> PartialOrd<T> for DeleteValue<T> {
-    fn partial_cmp(&self, other: &T) -> Option<Ordering> {
+impl<T: PartialOrd> PartialOrd<Box<TreeNode<T>>> for DeleteValue<T> {
+    fn partial_cmp(&self, other: &Box<TreeNode<T>>) -> Option<Ordering> {
         match self {
             Min => Some(Ordering::Less),
             Max => Some(Ordering::Greater),
-            Val(v) => v.partial_cmp(other),
+            Val(v) => v.partial_cmp(&other.val),
             _ => None,
         }
     }
@@ -206,26 +198,24 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                 Balanced
             }
             Some(root) => {
-                if *val == root.val || *val == *root {
+                if val == root {
                     if root.left.is_some() {
                         if root.right.is_some() {
                             if root.left.height() > root.right.height() {
-                                let mut left_max = Max;
-                                root.left.do_delete(&mut left_max);
-                                match left_max {
-                                    Del(Some(ref mut x)) => {
+                                *val = Max;
+                                root.left.do_delete(val);
+                                match val {
+                                    Del(Some(x)) => {
                                         swap(&mut root.val, &mut x.val);
-                                        *val = left_max;
                                     }
                                     _ => unreachable!(),
                                 }
                             } else {
-                                let mut right_min = Min;
-                                root.right.do_delete(&mut right_min);
-                                match right_min {
-                                    Del(Some(ref mut x)) => {
+                                *val = Min;
+                                root.right.do_delete(val);
+                                match val {
+                                    Del(Some(x)) => {
                                         swap(&mut root.val, &mut x.val);
-                                        *val = right_min;
                                     }
                                     _ => unreachable!(),
                                 }
@@ -240,7 +230,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         swap(self, &mut right);
                         *val = Del(right);
                     }
-                } else if *val < root.val {
+                } else if val < root {
                     match root.left.do_delete(val) {
                         Balanced => return Balanced,
                         Unknown => {
