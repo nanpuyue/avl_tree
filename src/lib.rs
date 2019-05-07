@@ -25,15 +25,15 @@ enum InnerResult {
     Left,     //在左子树完成插入
     Right,    //在右子树完成插入
     Unknown,  //树的平衡性未知
-    Balanced, //树已平衡
+    Balanced, //树已确定平衡
 }
 
 #[derive(Debug)]
 enum DeleteValue<T: PartialOrd> {
-    Min,
-    Max,
-    Val(T),
-    Del(AvlTreeNode<T>),
+    Min,                 //匹配最小节点
+    Max,                 //匹配最大节点
+    Val(T),              //匹配给定值
+    Del(AvlTreeNode<T>), //返回被删除节点
 }
 
 impl<T: PartialOrd> PartialEq<Box<TreeNode<T>>> for DeleteValue<T> {
@@ -152,11 +152,13 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
     fn do_insert(&mut self, val: T) -> InnerResult {
         match self {
             None => {
+                //插入新节点
                 *self = Self::new(val);
                 Unknown
             }
             Some(root) => {
                 let ret = {
+                    //进入左子树递归插入
                     if val < root.val {
                         match root.left.do_insert(val) {
                             Balanced => Balanced,
@@ -170,6 +172,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                             }
                             _ => Left,
                         }
+                    //进入右子树递归插入
                     } else {
                         match root.right.do_insert(val) {
                             Balanced => Balanced,
@@ -185,6 +188,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         }
                     }
                 };
+                //更新节点高度
                 self.update_height();
                 ret
             }
@@ -198,8 +202,10 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                 Balanced
             }
             Some(root) => {
+                //删除当前节点
                 if val == root {
                     if root.left.is_some() {
+                        //左右子树均非空
                         if root.right.is_some() {
                             if root.left.height() > root.right.height() {
                                 *val = Max;
@@ -220,16 +226,19 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                                     _ => unreachable!(),
                                 }
                             }
+                        //左子树非空，右子树为空
                         } else {
                             let mut left = root.left.take();
                             swap(self, &mut left);
                             *val = Del(left);
                         }
+                    //左子树为空，右子树非空或为空
                     } else {
                         let mut right = root.right.take();
                         swap(self, &mut right);
                         *val = Del(right);
                     }
+                //进入左子树递归删除
                 } else if val < root {
                     match root.left.do_delete(val) {
                         Balanced => return Balanced,
@@ -245,6 +254,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         }
                         _ => unreachable!(),
                     }
+                //进入右子树递归删除
                 } else {
                     match root.right.do_delete(val) {
                         Balanced => return Balanced,
@@ -261,10 +271,13 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         _ => unreachable!(),
                     }
                 }
+                //更新节点高度
                 self.update_height();
 
+                //平衡因子为 0，该节点高度发生变化
                 if self.balance_factor() == 0 {
                     Unknown
+                //平衡因子为 ±1，该节点高度未发生变化
                 } else {
                     Balanced
                 }
