@@ -4,6 +4,9 @@ pub fn validate<T: PartialOrd>(tree: &AvlTreeNode<T>) -> bool {
     match tree {
         None => {}
         Some(root) => {
+            if root.height != max(root.left.height(), root.right.height()) + 1 {
+                return false;
+            }
             if tree.balance_factor().abs() > 1 {
                 return false;
             }
