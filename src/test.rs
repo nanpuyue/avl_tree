@@ -69,7 +69,7 @@ fn test() {
     ]
     .into_iter()
     {
-        dbg!(avl_tree.delete(i));
+        assert_eq!(avl_tree.delete(i).unwrap().val, i);
         assert!(validate(&avl_tree));
     }
     assert!(&avl_tree.is_none());
