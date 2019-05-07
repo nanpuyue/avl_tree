@@ -4,7 +4,6 @@ use core::cmp::max;
 use core::mem::swap;
 
 pub use util::*;
-
 use InnerResult::*;
 
 #[cfg(test)]
@@ -29,11 +28,11 @@ enum InnerResult {
 }
 
 trait __AvlTree<T: PartialOrd> {
-    fn update_height(&mut self);
     fn rotate_ll(&mut self);
     fn rotate_rr(&mut self);
     fn rotate_lr(&mut self);
     fn rotate_rl(&mut self);
+    fn update_height(&mut self);
     fn do_insert(&mut self, val: T) -> InnerResult;
 }
 
@@ -44,25 +43,18 @@ pub trait AvlTree<T: PartialOrd> {
 }
 
 impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
-    fn update_height(&mut self) {
-        match self {
-            None => return,
-            Some(x) => x.height = max(x.left.height(), x.right.height()) + 1,
-        }
-    }
-
     fn rotate_ll(&mut self) {
         match self {
-            None => return,
+            None => unreachable!(),
             Some(root) => {
                 let left = &mut root.left.take();
                 match left {
                     None => unreachable!(),
                     Some(x) => {
-                        root.left = x.right.take();
+                        swap(&mut root.left, &mut x.right);
                         self.update_height();
-                        swap(&mut x.right, self);
-                        swap(left, self);
+                        swap(self, &mut x.right);
+                        swap(self, left);
                         self.update_height();
                     }
                 }
@@ -72,16 +64,16 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
 
     fn rotate_rr(&mut self) {
         match self {
-            None => return,
+            None => unreachable!(),
             Some(root) => {
                 let right = &mut root.right.take();
                 match right {
                     None => unreachable!(),
                     Some(x) => {
-                        root.right = x.left.take();
+                        swap(&mut root.right, &mut x.left);
                         self.update_height();
-                        swap(&mut x.left, self);
-                        swap(right, self);
+                        swap(self, &mut x.left);
+                        swap(self, right);
                         self.update_height();
                     }
                 }
@@ -91,7 +83,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
 
     fn rotate_lr(&mut self) {
         match self {
-            None => return,
+            None => unreachable!(),
             Some(root) => {
                 root.left.rotate_rr();
                 self.rotate_ll();
@@ -101,13 +93,21 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
 
     fn rotate_rl(&mut self) {
         match self {
-            None => return,
+            None => unreachable!(),
             Some(root) => {
                 root.right.rotate_ll();
                 self.rotate_rr();
             }
         }
     }
+
+    fn update_height(&mut self) {
+        match self {
+            None => return,
+            Some(x) => x.height = max(x.left.height(), x.right.height()) + 1,
+        }
+    }
+
     fn do_insert(&mut self, val: T) -> InnerResult {
         match self {
             None => {
