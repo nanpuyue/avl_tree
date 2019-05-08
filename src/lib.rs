@@ -28,7 +28,6 @@ enum InnerResult {
     Balanced, //树已确定平衡
 }
 
-#[derive(Debug)]
 enum DeleteValue<T: PartialOrd> {
     Min,                 //匹配最小节点
     Max,                 //匹配最大节点
@@ -58,7 +57,7 @@ impl<T: PartialOrd> PartialOrd<Box<TreeNode<T>>> for DeleteValue<T> {
     }
 }
 
-trait __AvlTree<T: PartialOrd>: Sized {
+trait __AvlTree<T: PartialOrd> {
     fn rotate_ll(&mut self);
     fn rotate_rr(&mut self);
     fn rotate_lr(&mut self);
@@ -79,11 +78,9 @@ pub trait AvlTree<T: PartialOrd> {
 impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
     fn rotate_ll(&mut self) {
         match self {
-            None => unreachable!(),
             Some(root) => {
                 let left = &mut root.left.take();
                 match left {
-                    None => unreachable!(),
                     Some(x) => {
                         swap(&mut root.left, &mut x.right);
                         self.update_height();
@@ -91,18 +88,18 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         swap(self, left);
                         self.update_height();
                     }
+                    None => unreachable!(),
                 }
             }
+            None => unreachable!(),
         }
     }
 
     fn rotate_rr(&mut self) {
         match self {
-            None => unreachable!(),
             Some(root) => {
                 let right = &mut root.right.take();
                 match right {
-                    None => unreachable!(),
                     Some(x) => {
                         swap(&mut root.right, &mut x.left);
                         self.update_height();
@@ -110,28 +107,30 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         swap(self, right);
                         self.update_height();
                     }
+                    None => unreachable!(),
                 }
             }
+            None => unreachable!(),
         }
     }
 
     fn rotate_lr(&mut self) {
         match self {
-            None => unreachable!(),
             Some(root) => {
                 root.left.rotate_rr();
                 self.rotate_ll();
             }
+            None => unreachable!(),
         }
     }
 
     fn rotate_rl(&mut self) {
         match self {
-            None => unreachable!(),
             Some(root) => {
                 root.right.rotate_ll();
                 self.rotate_rr();
             }
+            None => unreachable!(),
         }
     }
 
@@ -151,20 +150,21 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
 
     fn do_insert(&mut self, val: T) -> InnerResult {
         match self {
+            //直接插入新节点
             None => {
-                //插入新节点
                 *self = Self::new(val);
                 Unknown
             }
+            //递归插入
             Some(root) => {
-                let ret = {
+                let result = {
                     //重复数据
                     if val == root.val {
-                        Balanced
+                        return Balanced;
                     //进入左子树递归插入
                     } else if val < root.val {
                         match root.left.do_insert(val) {
-                            Balanced => Balanced,
+                            Balanced => return Balanced,
                             x if self.balance_factor() == 2 => {
                                 match x {
                                     Left => self.rotate_ll(),
@@ -178,7 +178,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                     //进入右子树递归插入
                     } else {
                         match root.right.do_insert(val) {
-                            Balanced => Balanced,
+                            Balanced => return Balanced,
                             x if self.balance_factor() == -2 => {
                                 match x {
                                     Left => self.rotate_rl(),
@@ -193,7 +193,8 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                 };
                 //更新节点高度
                 self.update_height();
-                ret
+
+                result
             }
         }
     }
