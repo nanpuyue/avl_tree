@@ -35,8 +35,8 @@ fn test() {
     .into_iter()
     {
         avl_tree.insert(i);
+        assert!(validate(&avl_tree));
     }
-    assert!(validate(&avl_tree));
 
     for i in vec![
         429, 65, 369, 480, 116, 52, 462, 349, 421, 6, 189, 194, 348, 145, 359, 166, 342, 228, 250,
