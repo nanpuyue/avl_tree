@@ -28,16 +28,26 @@ pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>, parent: &AvlTre
     if parent.is_none() {
         println!("digraph {{");
     }
+
     if let Some(root) = tree {
         if let Some(x) = &root.left {
-            println!("    {}->{}", root.val, x.val);
+            println!("    {} [group={}]", x.val, x.val);
+            println!("    {} -> {}", root.val, x.val);
             print_dot(&root.left, tree);
         }
+
+        if root.left.is_some() || root.right.is_some() {
+            println!("    _{} [group={}, label=\"\", width=0, style=invis]", root.val, root.val);
+            println!("    {} -> _{} [style=invis]", root.val, root.val);
+        }
+
         if let Some(x) = &root.right {
-            println!("    {}->{}", root.val, x.val);
+            println!("    {} [group={}]", x.val, x.val);
+            println!("    {} -> {}", root.val, x.val);
             print_dot(&root.right, tree);
         }
     }
+
     if parent.is_none() {
         println!("}}");
     }
