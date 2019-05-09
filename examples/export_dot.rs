@@ -2,7 +2,13 @@
 //!
 //! ```bash
 //! cargo run --example export_dot > tree.dot
-//! dot -Tsvg -otree.svg
+//! dot tree.dot -Tsvg -otree.svg
+//! ```
+//!
+//! Or
+//!
+//! ```bash
+//! cargo run --example export_dot | dot -Tsvg -otree.svg
 //! ```
 
 use avl_tree::*;
