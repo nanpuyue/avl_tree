@@ -19,5 +19,5 @@ fn main() {
         avl_tree.insert(i);
     }
 
-    print_dot(&avl_tree, &None);
+    print_dot(&avl_tree);
 }

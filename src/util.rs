@@ -24,19 +24,12 @@ pub fn validate<T: PartialOrd>(tree: &AvlTreeNode<T>) -> bool {
     true
 }
 
-pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>, parent: &AvlTreeNode<T>) {
-    if parent.is_none() {
-        println!("digraph {{");
-        println!("    nodesep=0");
-        println!("    node [shape=circle]");
-        println!("    edge [arrowhead=vee]");
-    }
-
-    if let Some(root) = tree {
+pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>) {
+    fn print_node<T: PartialOrd + Display>(node: &Box<TreeNode<T>>) {
         let mut target = None;
         let mut distance = 0;
 
-        if let Some(x) = &root.left {
+        if let Some(x) = &node.left {
             let mut left_max = x;
             let mut left_distance = 1;
             loop {
@@ -53,19 +46,19 @@ pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>, parent: &AvlTre
             if x.left.is_some() || x.right.is_some() {
                 println!("    {} [group={}]", x.val, x.val);
             }
-            println!("    {} -> {}", root.val, x.val);
-            print_dot(&root.left, tree);
+            println!("    {} -> {}", node.val, x.val);
+            print_node(x);
         }
 
-        if root.left.is_some() || root.right.is_some() {
+        if node.left.is_some() || node.right.is_some() {
             println!(
                 "    _{} [group={}, label=\"\", width=0.3, style=invis]",
-                root.val, root.val
+                node.val, node.val
             );
-            println!("    {} -> _{} [style=invis]", root.val, root.val);
+            println!("    {} -> _{} [style=invis]", node.val, node.val);
         }
 
-        if let Some(x) = &root.right {
+        if let Some(x) = &node.right {
             let mut right_min = x;
             let mut right_distance = 1;
             loop {
@@ -84,18 +77,26 @@ pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>, parent: &AvlTre
             if x.left.is_some() || x.right.is_some() {
                 println!("    {} [group={}]", x.val, x.val);
             }
-            println!("    {} -> {}", root.val, x.val);
-            print_dot(&root.right, tree);
+            println!("    {} -> {}", node.val, x.val);
+            print_node(x);
         }
 
         if distance > 1 {
             if let Some(x) = target {
-                println!("    {{rank=same _{} {}}}", root.val, x);
+                println!("    {{rank=same; _{}; {}}}", node.val, x);
             }
         }
     }
 
-    if parent.is_none() {
+    if let Some(x) = tree {
+        println!("digraph G {{");
+        println!("    nodesep=0");
+        println!("    node [shape=circle]");
+        println!("    edge [arrowhead=vee]");
+        if x.left.is_some() || x.right.is_some() {
+            println!("    {} [group={}]", x.val, x.val);
+        }
+        print_node(x);
         println!("}}");
     }
 }
