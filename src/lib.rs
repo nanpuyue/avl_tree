@@ -159,39 +159,53 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
             Some(root) => {
                 //重复数据
                 if val == root.val {
-                    return Balanced;
+                    Balanced
                 //进入左子树递归插入
                 } else if val < root.val {
                     match root.left.do_insert(val) {
-                        Balanced => return Balanced,
-                        x if self.balance_factor() == 2 => {
-                            match x {
-                                Left => self.rotate_ll(),
-                                Right => self.rotate_lr(),
-                                _ => unreachable!(),
+                        Balanced => Balanced,
+                        x => {
+                            if self.balance_factor() == 2 {
+                                match x {
+                                    Left => self.rotate_ll(),
+                                    Right => self.rotate_lr(),
+                                    _ => unreachable!(),
+                                }
+                                Balanced
+                            } else {
+                                if self.height() == {
+                                    self.update_height();
+                                    self.height()
+                                } {
+                                    Balanced
+                                } else {
+                                    Left
+                                }
                             }
-                            return Balanced;
-                        }
-                        _ => {
-                            self.update_height();
-                            Left
                         }
                     }
                 //进入右子树递归插入
                 } else {
                     match root.right.do_insert(val) {
-                        Balanced => return Balanced,
-                        x if self.balance_factor() == -2 => {
-                            match x {
-                                Left => self.rotate_rl(),
-                                Right => self.rotate_rr(),
-                                _ => unreachable!(),
+                        Balanced => Balanced,
+                        x => {
+                            if self.balance_factor() == -2 {
+                                match x {
+                                    Left => self.rotate_rl(),
+                                    Right => self.rotate_rr(),
+                                    _ => unreachable!(),
+                                }
+                                Balanced
+                            } else {
+                                if self.height() == {
+                                    self.update_height();
+                                    self.height()
+                                } {
+                                    Balanced
+                                } else {
+                                    Right
+                                }
                             }
-                            return Balanced;
-                        }
-                        _ => {
-                            self.update_height();
-                            Right
                         }
                     }
                 }
