@@ -157,44 +157,44 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
             }
             //递归插入
             Some(root) => {
-                let result = {
-                    //重复数据
-                    if val == root.val {
-                        return Balanced;
-                    //进入左子树递归插入
-                    } else if val < root.val {
-                        match root.left.do_insert(val) {
-                            Balanced => return Balanced,
-                            x if self.balance_factor() == 2 => {
-                                match x {
-                                    Left => self.rotate_ll(),
-                                    Right => self.rotate_lr(),
-                                    _ => unreachable!(),
-                                }
-                                Balanced
+                //重复数据
+                if val == root.val {
+                    return Balanced;
+                //进入左子树递归插入
+                } else if val < root.val {
+                    match root.left.do_insert(val) {
+                        Balanced => return Balanced,
+                        x if self.balance_factor() == 2 => {
+                            match x {
+                                Left => self.rotate_ll(),
+                                Right => self.rotate_lr(),
+                                _ => unreachable!(),
                             }
-                            _ => Left,
+                            return Balanced;
                         }
-                    //进入右子树递归插入
-                    } else {
-                        match root.right.do_insert(val) {
-                            Balanced => return Balanced,
-                            x if self.balance_factor() == -2 => {
-                                match x {
-                                    Left => self.rotate_rl(),
-                                    Right => self.rotate_rr(),
-                                    _ => unreachable!(),
-                                }
-                                Balanced
-                            }
-                            _ => Right,
+                        _ => {
+                            self.update_height();
+                            Left
                         }
                     }
-                };
-                //更新节点高度
-                self.update_height();
-
-                result
+                //进入右子树递归插入
+                } else {
+                    match root.right.do_insert(val) {
+                        Balanced => return Balanced,
+                        x if self.balance_factor() == -2 => {
+                            match x {
+                                Left => self.rotate_rl(),
+                                Right => self.rotate_rr(),
+                                _ => unreachable!(),
+                            }
+                            return Balanced;
+                        }
+                        _ => {
+                            self.update_height();
+                            Right
+                        }
+                    }
+                }
             }
         }
     }
@@ -206,6 +206,8 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                 Balanced
             }
             Some(root) => {
+                let height = root.height;
+
                 //删除当前节点
                 if val == root {
                     if root.left.is_some() {
@@ -242,6 +244,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                         swap(self, &mut right);
                         *val = Del(right);
                     }
+                    self.update_height();
                 //进入左子树递归删除
                 } else if val < root {
                     match root.left.do_delete(val) {
@@ -254,6 +257,8 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                                 } else {
                                     self.rotate_rr();
                                 }
+                            } else {
+                                self.update_height();
                             }
                         }
                         _ => unreachable!(),
@@ -270,20 +275,18 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                                 } else {
                                     self.rotate_lr();
                                 }
+                            } else {
+                                self.update_height();
                             }
                         }
                         _ => unreachable!(),
                     }
                 }
-                //更新节点高度
-                self.update_height();
 
-                //平衡因子为 0，该节点高度发生变化
-                if self.balance_factor() == 0 {
-                    Unknown
-                //平衡因子为 ±1，该节点高度未发生变化
-                } else {
+                if self.height() == height {
                     Balanced
+                } else {
+                    Unknown
                 }
             }
         }
