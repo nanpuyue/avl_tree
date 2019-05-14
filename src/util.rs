@@ -52,7 +52,7 @@ pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>) {
 
         if node.left.is_some() || node.right.is_some() {
             println!(
-                "    _{} [group={}, label=\"\", width=0.3, style=invis]",
+                "    _{} [group={}, label=\"\", width=0, style=invis]",
                 node.val, node.val
             );
             println!("    {} -> _{} [style=invis]", node.val, node.val);
@@ -90,7 +90,7 @@ pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>) {
 
     if let Some(x) = tree {
         println!("digraph G {{");
-        println!("    nodesep=0");
+        println!("    graph [nodesep=0.1]");
         println!("    node [shape=circle]");
         println!("    edge [arrowhead=vee]");
         if x.left.is_some() || x.right.is_some() {
