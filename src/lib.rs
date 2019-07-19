@@ -1,5 +1,3 @@
-#![feature(bind_by_move_pattern_guards)]
-
 use core::cmp::{max, Ordering};
 use core::mem::swap;
 
