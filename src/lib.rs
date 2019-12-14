@@ -134,7 +134,7 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
 
     fn update_height(&mut self) {
         match self {
-            None => return,
+            None => {}
             Some(x) => x.height = max(x.left.height(), x.right.height()) + 1,
         }
     }
@@ -170,15 +170,13 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                                     _ => unreachable!(),
                                 }
                                 Balanced
+                            } else if self.height() == {
+                                self.update_height();
+                                self.height()
+                            } {
+                                Balanced
                             } else {
-                                if self.height() == {
-                                    self.update_height();
-                                    self.height()
-                                } {
-                                    Balanced
-                                } else {
-                                    Left
-                                }
+                                Left
                             }
                         }
                     }
@@ -194,15 +192,13 @@ impl<T: PartialOrd> __AvlTree<T> for AvlTreeNode<T> {
                                     _ => unreachable!(),
                                 }
                                 Balanced
+                            } else if self.height() == {
+                                self.update_height();
+                                self.height()
+                            } {
+                                Balanced
                             } else {
-                                if self.height() == {
-                                    self.update_height();
-                                    self.height()
-                                } {
-                                    Balanced
-                                } else {
-                                    Right
-                                }
+                                Right
                             }
                         }
                     }

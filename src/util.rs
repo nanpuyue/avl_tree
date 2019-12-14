@@ -25,20 +25,16 @@ pub fn validate<T: PartialOrd>(tree: &AvlTreeNode<T>) -> bool {
 }
 
 pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>) {
-    fn print_node<T: PartialOrd + Display>(node: &Box<TreeNode<T>>) {
+    fn print_node<T: PartialOrd + Display>(node: &TreeNode<T>) {
         let mut target = None;
         let mut distance = 0;
 
         if let Some(x) = &node.left {
             let mut left_max = x;
             let mut left_distance = 1;
-            loop {
-                if let Some(x) = &left_max.right {
-                    left_max = x;
-                    left_distance += 1;
-                } else {
-                    break;
-                }
+            while let Some(x) = &left_max.right {
+                left_max = x;
+                left_distance += 1;
             }
             target = Some(&left_max.val);
             distance = left_distance;
@@ -61,15 +57,11 @@ pub fn print_dot<T: PartialOrd + Display>(tree: &AvlTreeNode<T>) {
         if let Some(x) = &node.right {
             let mut right_min = x;
             let mut right_distance = 1;
-            loop {
-                if let Some(x) = &right_min.left {
-                    right_min = x;
-                    right_distance += 1;
-                } else {
-                    break;
-                }
+            while let Some(x) = &right_min.left {
+                right_min = x;
+                right_distance += 1;
             }
-            if !(right_distance > distance) {
+            if right_distance <= distance {
                 target = Some(&right_min.val);
                 distance = right_distance;
             }
